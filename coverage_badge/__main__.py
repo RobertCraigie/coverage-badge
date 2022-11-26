@@ -41,13 +41,13 @@ class Devnull(object):
         pass
 
 
-def get_total():
+def get_total(ignore_errors: bool = False):
     """
     Return the rounded total as properly rounded string.
     """
     cov = coverage.Coverage()
     cov.load()
-    total = cov.report(file=Devnull())
+    total = cov.report(file=Devnull(), ignore_errors=ignore_errors)
 
     if hasattr(coverage.results.Numbers, 'set_precision'):  # Coverage <= 5
         class Precision(coverage.results.Numbers):
@@ -114,6 +114,8 @@ def parse_args(argv=None):
             help='Don\'t output any non-error messages.')
     parser.add_argument('-v', dest='print_version', action='store_true',
             help='Show version.')
+    parser.add_argument('--cov-ignore-errors', dest='cov_ignore_errors', action='store_true',
+            help='Ignore errors while reading source filed.')
 
     # If arguments have been passed in, use them.
     if argv:
@@ -168,7 +170,7 @@ def main(argv=None):
 
     # Generate badge
     try:
-        total = get_total()
+        total = get_total(ignore_errors=args.cov_ignore_errors)
     except coverage.misc.CoverageException as e:
         print('Error: {} Did you run coverage first?'.format(e))
         sys.exit(1)
